@@ -51,7 +51,8 @@ if $deps_check_passed
 then
     echo -e "${GREEN}Dependency checks passed${NC}"
     echo -e "Provisioning an EC2 instance with an OpenVPN server"
-    python3.9 provision_ec2.py
+    publicIP=`python3.9 provision_ec2.py`
+    echo $publicIP
 else
      echo -e "${RED} Dependency checks failed${NC}"
 fi
