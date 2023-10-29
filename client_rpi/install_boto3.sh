@@ -54,10 +54,26 @@ then
     publicIP=`python3.9 provision_ec2.py`
     echo -e "${GREEN}OpenVPN server is live at $publicIP"
     echo -e "${NC}Fetching client configuration from OpenVPN server at $publicIP ${NC}"
-    sudo curl --interface eth0 http://$publicIP:8080/client1.ovpn -o /etc/openvpn/client1.conf
+    sudo curl -s --interface eth0 http://$publicIP:8080/client1.ovpn -o /etc/openvpn/client1.conf
     echo -e "Starting OpenVPN service using systemctl interface"
     sudo systemctl start openvpn@client1.service
-    echo -e "OpenVPN service started successfully"
+    systemctl_start_openvpn_client_status=$?
+    if [ $systemctl_start_openvpn_client_status -eq 0 ]; then
+        echo -e "${GREEN}OpenVPN service started successfully"
+        deps_check_passed=true
+    else
+       echo -e "${RED}Failed to start OpenVPN client service ${NC}"
+    fi
+    echo -e "${NC}Setting up iptables to forward all traffic from wlan0 to tun0"
+    sudo sed -i 's/eth0/tun0/g' /etc/iptables.ipv4.nat
+    sudo iptables-legacy-restore < /etc/iptables.ipv4.nat
+    iptables_restore_status=$?
+    if [ $iptables_restore_status -eq 0 ]; then
+        echo -e "${NC}Successfully set up iptables to forward all traffic from wlan0 to tun0"
+        echo -e "${NC}Ready to use the VPN"
+    else
+        echo -e "${RED}Failed to setup iptables"
+    fi
 else
-     echo -e "${RED} Dependency checks failed${NC}"
+    echo -e "${RED} Dependency checks failed${NC}"
 fi
