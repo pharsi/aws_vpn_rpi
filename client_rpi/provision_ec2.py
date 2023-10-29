@@ -156,7 +156,7 @@ ec2_response = ec2_client.run_instances(
 )
 
 instanceId = ec2_response["Instances"][0]["InstanceId"]
-waiter = ec2_client.get_waiter('instance_running')
+waiter = ec2_client.get_waiter('instance_status_ok')
 
 # Wait for the instance to reach the 'running' state
 waiter.wait(InstanceIds=[instanceId])

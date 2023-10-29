@@ -56,7 +56,7 @@ then
     echo "${NC}Fetching client configuration from OpenVPN server at $publicIP ${NC}"
     sudo curl --interface eth0 http://$publicIP:8080/client1.ovpn -o /etc/openvpn/client1.ovpn
     echo "Starting OpenVPN service using systemctl interface"
-    sudo sytemctl start openvpn@client1.service
+    sudo systemctl start openvpn@client1.service
     echo "OpenVPN service started successfully"
 else
      echo -e "${RED} Dependency checks failed${NC}"
