@@ -52,7 +52,12 @@ then
     echo -e "${GREEN}Dependency checks passed${NC}"
     echo -e "Provisioning an EC2 instance with an OpenVPN server"
     publicIP=`python3.9 provision_ec2.py`
-    echo $publicIP
+    echo "${GREEN}OpenVPN server is live at $publicIP"
+    echo "${NC}Fetching client configuration from OpenVPN server at $publicIP ${NC}"
+    sudo curl --interface eth0 http://$publicIP:8080/client1.ovpn -o /etc/openvpn/client1.ovpn
+    echo "Starting OpenVPN service using systemctl interface"
+    sudo sytemctl start openvpn@client1.service
+    echo "OpenVPN service started successfully"
 else
      echo -e "${RED} Dependency checks failed${NC}"
 fi
