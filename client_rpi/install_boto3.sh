@@ -50,14 +50,6 @@ check_deps
 if $deps_check_passed
 then
     echo -e "${GREEN}Dependency checks passed${NC}"
-    # if [ -d "~/client_ovpn" ]; then
-    #     echo "~/client_ovpn exists, removing it"
-    #     rm -rf ~/client_ovpn
-    # fi
-    # mkdir ~/client_ovpn
-    # cd ~/client_ovpn
-    # echo -e "Cloning public repo${NC}"
-    # git clone https://github.com/pharsi/aws_vpn_rpi.git .
     echo -e "Provisioning an EC2 instance with an OpenVPN server"
     python3.9 provision_ec2.py
 else
