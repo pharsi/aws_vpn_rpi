@@ -164,6 +164,6 @@ waiter.wait(InstanceIds=[instanceId])
 instance_info = ec2_client.describe_instances(InstanceIds=[instanceId])
 public_ip = instance_info['Reservations'][0]['Instances'][0]['PublicIpAddress']
 
-sys.stdout.write('OpenVPN is live at ' + public_ip)
+sys.stdout.write(public_ip)
 sys.stdout.flush()
 sys.exit(0)
