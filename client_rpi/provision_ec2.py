@@ -1,4 +1,5 @@
 import boto3
+import sys
 from botocore.config import Config
 import urllib.request
 
@@ -15,6 +16,9 @@ my_config = Config(
 with open("/home/rpi/openvpn/keysFile") as file:
   [accessKeyId, secretAccessKey] = file.readlines()
 
+accessKeyId = accessKeyId.strip()
+secretAccessKey = secretAccessKey.strip()
+
 ec2_client = boto3.client('ec2', config=my_config, aws_access_key_id = accessKeyId, aws_secret_access_key = secretAccessKey)
 
 userDataScript = '''#!/bin/bash
@@ -22,9 +26,11 @@ mkdir /home/ubuntu/openvpn
 cd /home/ubuntu/openvpn
 curl https://raw.githubusercontent.com/angristan/openvpn-install/master/openvpn-install.sh -o openvpn-install.sh
 chmod +x openvpn-install.sh
-sed -i '284s/1194/443/' ~/openvpn/openvpn-install.sh
+sed -i '284s/1194/443/' /home/ubuntu/openvpn/openvpn-install.sh
+sed -i '902s/3/10/' /home/ubuntu/openvpn/openvpn-install.sh
 sudo bash -c 'export AUTO_INSTALL=y && export APPROVE_INSTALL=y && export APPROVE_IP=y && export IPV6_SUPPORT=n && export PORT_CHOICE=1 && export PROTOCOL_CHOICE=2 && export DNS=9 && export COMPRESSION_ENABLED=n && export CUSTOMIZE_ENC=n && export CLIENT=client1 && export PASS=1 && ./openvpn-install.sh'
 mv /root/client1.ovpn /home/ubuntu/openvpn/client1.ovpn
+python3 -m http.server 8080
 '''
 
 # Get VPC ID of the default VPC
@@ -87,7 +93,18 @@ authorize_security_group_ingress_response = ec2_client.authorize_security_group_
             ],
             'ToPort': 443,
         },
+        {
+            'FromPort': 8080,
+            'IpProtocol': 'tcp',
+            'IpRanges': [
                 {
+                    'CidrIp': public_ip_rpi+'/32',
+                    'Description': 'Allow port 8080 for RPi to pull OpenVPN client config'
+                },
+            ],
+            'ToPort': 8080,
+        },
+        {
             'FromPort': 22,
             'IpProtocol': 'tcp',
             'IpRanges': [
@@ -116,119 +133,15 @@ authorize_security_group_ingress_response = ec2_client.authorize_security_group_
 
 # Create EC2 instance and install OpenVPN server package
 
-ec2_resonse = ec2_client.run_instances(
-    # BlockDeviceMappings=[
-    #     {
-    #         'DeviceName': '/dev/sda',
-    #         'Ebs': {
-    #             'DeleteOnTermination': True,
-    #             # 'Iops': 123,
-    #             'VolumeSize': 8,
-    #             'VolumeType': 'gp3',
-    #             # 'KmsKeyId': 'string',
-    #             # 'Throughput': 123,
-    #             # 'OutpostArn': 'string',
-    #             'Encrypted': False
-    #         },
-    #     },
-    # ],
+ec2_response = ec2_client.run_instances(
     ImageId='ami-0df4b2961410d4cff',
     InstanceType='t2.micro',
-    # Ipv6AddressCount=123,
-    # Ipv6Addresses=[
-    #     {
-    #         'Ipv6Address': 'string',
-    #         'IsPrimaryIpv6': True|False
-    #     },
-    # ],
-    # KernelId='string',
     KeyName='vpn',
     MaxCount=1,
     MinCount=1,
-    # Monitoring={
-    #     'Enabled': False
-    # },
-    # Placement={
-    #     'AvailabilityZone': 'string',
-    #     'Affinity': 'string',
-    #     'GroupName': 'string',
-    #     'PartitionNumber': 123,
-    #     'HostId': 'string',
-    #     'Tenancy': 'default',
-    #     'SpreadDomain': 'string',
-    #     # 'HostResourceGroupArn': 'string',
-    #     'GroupId': 'string'
-    # },
-    # RamdiskId='string',
     SecurityGroupIds=[securityGroup_Id],
-    # SecurityGroups=['openvpn_sg',],
     SubnetId=subnetID,
     UserData= userDataScript,
-    # AdditionalInfo='string',
-    # ClientToken='string',
-    # DisableApiTermination=False,
-    # EbsOptimized=True,
-    # IamInstanceProfile={
-    #     'Arn': 'string',
-    #     'Name': 'string'
-    # },
-    # InstanceInitiatedShutdownBehavior='terminate',
-    # NetworkInterfaces=[
-    #     {
-    #         'AssociatePublicIpAddress': True|False,
-    #         'DeleteOnTermination': True|False,
-    #         'Description': 'string',
-    #         'DeviceIndex': 123,
-    #         'Groups': [
-    #             'string',
-    #         ],
-    #         'Ipv6AddressCount': 123,
-    #         'Ipv6Addresses': [
-    #             {
-    #                 'Ipv6Address': 'string',
-    #                 'IsPrimaryIpv6': True|False
-    #             },
-    #         ],
-    #         'NetworkInterfaceId': 'string',
-    #         'PrivateIpAddress': 'string',
-    #         'PrivateIpAddresses': [
-    #             {
-    #                 'Primary': True|False,
-    #                 'PrivateIpAddress': 'string'
-    #             },
-    #         ],
-    #         'SecondaryPrivateIpAddressCount': 123,
-    #         'SubnetId': 'string',
-    #         'AssociateCarrierIpAddress': True|False,
-    #         'InterfaceType': 'string',
-    #         'NetworkCardIndex': 123,
-    #         'Ipv4Prefixes': [
-    #             {
-    #                 'Ipv4Prefix': 'string'
-    #             },
-    #         ],
-    #         'Ipv4PrefixCount': 123,
-    #         'Ipv6Prefixes': [
-    #             {
-    #                 'Ipv6Prefix': 'string'
-    #             },
-    #         ],
-    #         'Ipv6PrefixCount': 123,
-    #         'PrimaryIpv6': True|False
-    #     },
-    # ],
-    # PrivateIpAddress='string',
-    # ElasticGpuSpecification=[
-    #     {
-    #         'Type': 'string'
-    #     },
-    # ],
-    # ElasticInferenceAccelerators=[
-    #     {
-    #         'Type': 'string',
-    #         'Count': 123
-    #     },
-    # ],
     TagSpecifications=[
         {
             'ResourceType': 'instance',
@@ -240,62 +153,17 @@ ec2_resonse = ec2_client.run_instances(
             ]
         },
     ],
-    # LaunchTemplate={
-    #     'LaunchTemplateId': 'string',
-    #     'LaunchTemplateName': 'string',
-    #     'Version': 'string'
-    # },
-    # InstanceMarketOptions={
-    #     'MarketType': 'spot',
-    #     'SpotOptions': {
-    #         'MaxPrice': 'string',
-    #         'SpotInstanceType': 'one-time'|'persistent',
-    #         'BlockDurationMinutes': 123,
-    #         'ValidUntil': datetime(2015, 1, 1),
-    #         'InstanceInterruptionBehavior': 'hibernate'|'stop'|'terminate'
-    #     }
-    # },
-    # CreditSpecification={
-    #     'CpuCredits': 'string'
-    # },
-    # CpuOptions={
-    #     'CoreCount': 123,
-    #     'ThreadsPerCore': 123,
-    #     'AmdSevSnp': 'enabled'|'disabled'
-    # },
-    # CapacityReservationSpecification={
-    #     'CapacityReservationPreference': 'open'|'none',
-    #     'CapacityReservationTarget': {
-    #         'CapacityReservationId': 'string',
-    #         'CapacityReservationResourceGroupArn': 'string'
-    #     }
-    # },
-    # HibernationOptions={
-    #     'Configured': True|False
-    # },
-    # LicenseSpecifications=[
-    #     {
-    #         'LicenseConfigurationArn': 'string'
-    #     },
-    # ],
-    # MetadataOptions={
-    #     'HttpTokens': 'optional'|'required',
-    #     'HttpPutResponseHopLimit': 123,
-    #     'HttpEndpoint': 'disabled'|'enabled',
-    #     'HttpProtocolIpv6': 'disabled'|'enabled',
-    #     'InstanceMetadataTags': 'disabled'|'enabled'
-    # },
-    # EnclaveOptions={
-    #     'Enabled': True|False
-    # },
-    # PrivateDnsNameOptions={
-    #     'HostnameType': 'ip-name'|'resource-name',
-    #     'EnableResourceNameDnsARecord': True|False,
-    #     'EnableResourceNameDnsAAAARecord': False
-    # },
-    # MaintenanceOptions={
-    #     'AutoRecovery': 'disabled'|'default'
-    # },
-    # DisableApiStop=True|False,
-    # EnablePrimaryIpv6=False
 )
+
+instanceId = ec2_response["Instances"][0]["InstanceId"]
+waiter = ec2_client.get_waiter('instance_running')
+
+# Wait for the instance to reach the 'running' state
+waiter.wait(InstanceIds=[instanceId])
+# Describe the instance to get its public IP address
+instance_info = ec2_client.describe_instances(InstanceIds=[instanceId])
+public_ip = instance_info['Reservations'][0]['Instances'][0]['PublicIpAddress']
+
+sys.stdout.write('OpenVPN is live at ' + public_ip)
+sys.stdout.flush()
+sys.exit(0)
