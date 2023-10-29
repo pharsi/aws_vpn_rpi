@@ -59,7 +59,7 @@ then
     # echo -e "Cloning public repo${NC}"
     # git clone https://github.com/pharsi/aws_vpn_rpi.git .
     echo -e "Provisioning an EC2 instance with an OpenVPN server"
-    python3.9 client_rpi/provision_ec2.py
+    python3.9 provision_ec2.py
 else
      echo -e "${RED} Dependency checks failed${NC}"
 fi
