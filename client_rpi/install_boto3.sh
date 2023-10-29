@@ -51,7 +51,7 @@ if $deps_check_passed
 then
     echo -e "${GREEN}Dependency checks passed${NC}"
     echo -e "Provisioning an EC2 instance with an OpenVPN server"
-    publicIP=`python3.9 /home/rpi/client_vpn/client_rpi/provision_ec2.py`
+    publicIP=`python3.9 /home/rpi/client_ovpn/client_rpi/provision_ec2.py`
     echo -e "${GREEN}OpenVPN server is live at $publicIP"
     echo -e "${NC}Fetching client configuration from OpenVPN server at $publicIP ${NC}"
     sudo curl -s --interface eth0 http://$publicIP:8080/client1.ovpn -o /etc/openvpn/client1.conf
