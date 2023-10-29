@@ -7,7 +7,7 @@ check_deps(){
 
     # Check if python 3.9 is available, else install it
     if command -v python3.9 >/dev/null 2>&1 ; then
-    echo -e "${GREEN} python3.9 found ${NC}"
+    echo -e "${GREEN}python3.9 found ${NC}"
     deps_check_passed=true
 
     else
@@ -16,7 +16,7 @@ check_deps(){
     
     # Check if pip is available, else install it
     if command -v pip >/dev/null 2>&1 ; then
-        echo -e "${GREEN} pip found"
+        echo -e "${GREEN}pip found"
         deps_check_passed=true
     else
        echo -e "${RED}pip not found, installing pip ${NC}"
@@ -25,7 +25,7 @@ check_deps(){
 
     # Check if git is available, else install it
     if command -v git >/dev/null 2>&1 ; then
-        echo -e "${GREEN} git found"
+        echo -e "${GREEN}git found"
         deps_check_passed=true
     else
        echo -e "${RED}git not found, installing git ${NC}"
@@ -50,16 +50,16 @@ check_deps
 if $deps_check_passed
 then
     echo -e "${GREEN}Dependency checks passed${NC}"
-    if [ -d "~/client_ovpn" ]; then
-        echo "~/client_ovpn exists, removing it"
-        rm -rf ~/client_ovpn
-    fi
-    mkdir ~/client_ovpn
-    cd ~/client_ovpn
-    echo -e "Cloning public repo${NC}"
-    git clone https://github.com/pharsi/aws_vpn_rpi.git .
+    # if [ -d "~/client_ovpn" ]; then
+    #     echo "~/client_ovpn exists, removing it"
+    #     rm -rf ~/client_ovpn
+    # fi
+    # mkdir ~/client_ovpn
+    # cd ~/client_ovpn
+    # echo -e "Cloning public repo${NC}"
+    # git clone https://github.com/pharsi/aws_vpn_rpi.git .
     echo -e "Provisioning an EC2 instance with an OpenVPN server"
-    python3.9 client_rpi/
+    python3.9 client_rpi/provision_ec2.py
 else
      echo -e "${RED} Dependency checks failed${NC}"
 fi
