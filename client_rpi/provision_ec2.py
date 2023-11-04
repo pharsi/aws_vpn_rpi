@@ -158,12 +158,53 @@ ec2_response = ec2_client.run_instances(
 instanceId = ec2_response["Instances"][0]["InstanceId"]
 waiter = ec2_client.get_waiter('instance_status_ok')
 
-# Wait for the instance to reach the 'running' state
+# Wait for the instance to pass the status checks
 waiter.wait(InstanceIds=[instanceId])
-# Describe the instance to get its public IP address
-instance_info = ec2_client.describe_instances(InstanceIds=[instanceId])
-public_ip = instance_info['Reservations'][0]['Instances'][0]['PublicIpAddress']
 
-sys.stdout.write(public_ip)
+# Once the instance is running we can now attach an Elastic IP address or allocate one
+addresses_dict = ec2_client.describe_addresses(
+     Filters=[
+        {
+            'Name': 'tag:Name',
+            'Values': [
+                'rpi',
+            ]
+        },
+          {
+            'Name': 'tag:Type',
+            'Values': [
+                'vpn',
+            ]
+        },
+    ],
+)
+
+if addresses_dict["Addresses"] == []:
+  allocate_address_response = ec2_client.allocate_address(Domain='vpc',  TagSpecifications=
+    [{
+      'ResourceType': 'elastic-ip',
+      'Tags':[{
+                'Key': 'Name',
+                'Value': 'rpi'
+            },
+            {
+                'Key': 'Type',
+                'Value': 'vpn'
+            }]
+    }]
+)
+  elastic_ip = allocate_address_response['PublicIp']
+  associate_address_response = ec2_client.associate_address(
+    InstanceId=instanceId,
+    PublicIp=elastic_ip
+)
+else:
+  elastic_ip = addresses_dict["Addresses"][0]["PublicIp"]
+  associate_address_response = ec2_client.associate_address(
+    InstanceId=instanceId,
+    PublicIp=elastic_ip
+)
+
+sys.stdout.write(elastic_ip)
 sys.stdout.flush()
 sys.exit(0)
