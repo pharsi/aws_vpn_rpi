@@ -55,6 +55,7 @@ then
     echo -e "${GREEN}OpenVPN server is live at $publicIP"
     echo -e "${NC}Fetching client configuration from OpenVPN server at $publicIP ${NC}"
     sudo curl -s --interface eth0 http://$publicIP:8080/client1.ovpn -o /etc/openvpn/client1.conf
+    sudo sed -i "s/remote .*/remote $publicIp 443/g" /etc/openvpn/client1.conf
     echo -e "Starting OpenVPN service using systemctl interface"
     sudo systemctl start openvpn@client1.service
     systemctl_start_openvpn_client_status=$?
