@@ -16,7 +16,7 @@ check_deps(){
     
     # Check if pip is available, else install it
     if command -v pip >/dev/null 2>&1 ; then
-        echo -e "${GREEN}pip found"
+        echo -e "${GREEN}pip found${NC}"
         deps_check_passed=true
     else
        echo -e "${RED}pip not found, installing pip ${NC}"
@@ -25,7 +25,7 @@ check_deps(){
 
     # Check if git is available, else install it
     if command -v git >/dev/null 2>&1 ; then
-        echo -e "${GREEN}git found"
+        echo -e "${GREEN}git found${NC}"
         deps_check_passed=true
     else
        echo -e "${RED}git not found, installing git ${NC}"
@@ -60,20 +60,20 @@ then
     sudo systemctl start openvpn@client1.service
     systemctl_start_openvpn_client_status=$?
     if [ $systemctl_start_openvpn_client_status -eq 0 ]; then
-        echo -e "${GREEN}OpenVPN service started successfully"
+        echo -e "${GREEN}OpenVPN service started successfully${NC}"
         deps_check_passed=true
     else
        echo -e "${RED}Failed to start OpenVPN client service ${NC}"
     fi
-    echo -e "${NC}Setting up iptables to forward all traffic from wlan0 to tun0"
+    echo -e "${NC}Setting up iptables to forward all traffic from wlan0 to tun0${NC}"
     sudo sed -i 's/eth0/tun0/g' /etc/iptables.ipv4.nat
     sudo iptables-legacy-restore < /etc/iptables.ipv4.nat
     iptables_restore_status=$?
     if [ $iptables_restore_status -eq 0 ]; then
-        echo -e "${NC}Successfully set up iptables to forward all traffic from wlan0 to tun0"
-        echo -e "${NC}Ready to use the VPN"
+        echo -e "${NC}Successfully set up iptables to forward all traffic from wlan0 to tun0${NC}"
+        echo -e "${NC}Ready to use the VPN${NC}"
     else
-        echo -e "${RED}Failed to setup iptables"
+        echo -e "${RED}Failed to setup iptables${NC}"
     fi
 else
     echo -e "${RED} Dependency checks failed${NC}"
