@@ -28,7 +28,7 @@ curl https://raw.githubusercontent.com/angristan/openvpn-install/master/openvpn-
 chmod +x openvpn-install.sh
 sed -i '284s/1194/443/' /home/ubuntu/openvpn/openvpn-install.sh
 sed -i '902s/3/10/' /home/ubuntu/openvpn/openvpn-install.sh
-sudo bash -c 'export AUTO_INSTALL=y && export APPROVE_INSTALL=y && export APPROVE_IP=y && export IPV6_SUPPORT=n && export PORT_CHOICE=1 && export PROTOCOL_CHOICE=2 && export DNS=9 && export COMPRESSION_ENABLED=n && export CUSTOMIZE_ENC=n && export CLIENT=client1 && export PASS=1 && ./openvpn-install.sh'
+sudo bash -c 'export AUTO_INSTALL=y && export APPROVE_INSTALL=y && export APPROVE_IP=y && export IPV6_SUPPORT=n && export PORT_CHOICE=1 && export PROTOCOL_CHOICE=1 && export DNS=9 && export COMPRESSION_ENABLED=n && export CUSTOMIZE_ENC=n && export CLIENT=client1 && export PASS=1 && ./openvpn-install.sh'
 mv /root/client1.ovpn /home/ubuntu/openvpn/client1.ovpn
 python3 -m http.server 8080
 '''
@@ -84,7 +84,7 @@ authorize_security_group_ingress_response = ec2_client.authorize_security_group_
      IpPermissions=[
         {
             'FromPort': 443,
-            'IpProtocol': 'tcp',
+            'IpProtocol': 'udp',
             'IpRanges': [
                 {
                     'CidrIp': public_ip_rpi+'/32',
