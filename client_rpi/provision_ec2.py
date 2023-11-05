@@ -135,7 +135,7 @@ authorize_security_group_ingress_response = ec2_client.authorize_security_group_
 
 ec2_response = ec2_client.run_instances(
     ImageId='ami-0df4b2961410d4cff',
-    InstanceType='t2.micro',
+    InstanceType='t3.small',
     KeyName='vpn',
     MaxCount=1,
     MinCount=1,
